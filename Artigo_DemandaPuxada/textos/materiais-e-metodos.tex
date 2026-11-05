@@ -1,0 +1,44 @@
+\section{Materiais e Métodos}
+\label{sec-materiais}
+
+Este estudo adota uma abordagem quantitativa aplicada, baseada em experimentação computacional para a avaliação de modelos de previsão de demanda. Foram implementados dois modelos preditivos, sendo uma regressão linear múltipla ajustada pelo método dos mínimos quadrados ordinários (\textit{Ordinary Least Squares} (OLS) e uma rede neural recorrente do tipo \textit{Long Short-Term Memory} (LSTM). O desempenho dessas abordagens foi comparado na previsão do volume mensal de vendas por sabor. Todos códigos foram executados no ambiente Google Colab, utilizando a linguagem Python.
+
+\subsection{Base de Dados}
+
+A base de dados foi fornecida pela empresa Claújuices, especializada na produção de sucos naturais, e abrange o período de abril de 2025 a junho de 2026, totalizando 15 meses consecutivos. Originalmente, o conjunto continha apenas registros de meses em que houve comercialização de determinado sabor. Durante o pré-processamento, a base foi expandida para incluir todas as combinações entre os 15 sabores e os 15 meses analisados, resultando em um painel de 225 registros. As combinações sem vendas foram preenchidas com volume igual a zero, representando ausência efetiva de comercialização e não valores ausentes. Cada registro corresponde ao volume vendido, em litros, de um sabor em um mês específico. Aproximadamente 53\% das observações apresentam volume igual a zero, refletindo a diferença entre sabores consolidados e produtos recém-lançados ou de baixa demanda. Cada registro é descrito pelas seguintes variáveis:
+
+\begin{itemize}
+\item Ano e mês de referência;
+\item Sabor do produto (codificado numericamente);
+\item Temperatura média mensal;
+\item Número de dias úteis e de finais de semana;
+\item Indicador de ocorrência de feriados;
+\item Indicador binário de sabor recém-lançado;
+\item Volume vendido no mês anterior;
+\item Média móvel de três meses do volume vendido;
+\item Volume vendido no mês corrente (variável-alvo).
+\end{itemize}
+
+A variável correspondente ao mês foi codificada de forma cíclica por meio das funções seno e cosseno, preservando a continuidade temporal entre dezembro e janeiro. Devido à heterogeneidade do histórico de vendas, os experimentos principais foram restritos aos sabores com pelo menos seis meses de vendas não nulas, classificados como sabores estabelecidos. Assim, o estudo contemplou os sabores abacaxi, abacaxi com hortelã, bergamota, laranja, laranja com couve, limonada, maracujá, morango e uva. Os sabores butiá, goiaba, manga, melancia e pink lemonade, por apresentarem quantidade insuficiente de observações para o treinamento de modelos específicos, foram analisados separadamente por meio de estimativas de referência baseadas na média histórica. As implicações dessa limitação são discutidas na Seção \ref{sec-consideracoes}.
+
+As variáveis explicativas foram normalizadas por meio da técnica \textit{Min-Max}, utilizando parâmetros estimados exclusivamente a partir do conjunto de treinamento, posteriormente aplicados ao conjunto de teste para evitar vazamento de informação. A variável-alvo foi normalizada individualmente para cada sabor, devido às diferenças expressivas de escala entre os volumes de venda.
+
+A divisão entre treinamento e teste foi adaptada às características de cada modelo. Na regressão linear, empregou-se uma divisão aleatória estratificada por sabor, mantendo aproximadamente 80\% das observações para treinamento e 20\% para teste em cada grupo. Para a LSTM, a divisão foi cronológica, reservando os três meses mais recentes para teste e utilizando os meses anteriores para treinamento, preservando a sequência temporal dos dados.
+
+\subsection{Modelos e Métricas de Avaliação}
+
+O primeiro modelo consiste em uma regressão linear múltipla ajustada pelo método dos mínimos quadrados ordinários (OLS), utilizando a implementação \textit{LinearRegression} da biblioteca \textit{scikit-learn}. Em vez de modelos independentes para cada sabor, foi ajustado um único modelo utilizando o identificador do sabor como variável explicativa numérica. Essa estratégia foi adotada por conta da pequena quantidade de instâncias por sabor que comprometia a estabilidade estatística de modelos individuais. Como a regressão linear possui solução analítica, não há hiperparâmetros de treinamento iterativo, como número de épocas ou taxa de aprendizado. O segundo modelo consiste em uma rede neural recorrente do tipo LSTM, empregada para modelar as dependências temporais da série histórica de vendas. A arquitetura é composta por uma camada LSTM com 16 unidades e ativação tangente hiperbólica, seguida por uma camada com oito neurônios e ativação ReLU e uma camada de saída com um único neurônio responsável pela previsão do volume vendido no mês subsequente.
+
+A entrada do modelo é formada por sequências temporais de três meses consecutivos (\textit{lookback} = 3), compostas pelas variáveis explicativas e pelo histórico de vendas incorporado à própria sequência. As variáveis defasadas utilizadas na regressão linear (volume do mês anterior e média móvel de três meses) não foram incluídas, pois a LSTM é capaz de aprender automaticamente essas dependências temporais durante o treinamento. 
+
+O modelo foi treinado durante 200 épocas utilizando o otimizador Adam, com taxa de aprendizado igual a 0,001 e função de perda baseada no erro quadrático médio (MSE). Durante o treinamento, 15\% das amostras foram reservadas para validação interna. \\
+
+O desempenho dos modelos foi avaliado por meio do coeficiente de determinação ($R^2$), definido por:
+
+\[R^2 = 1 - \frac{SQ_{res}}{SQ_{tot}},\]
+
+em que $SQ_{res}$ representa a soma dos quadrados dos resíduos e $SQ_{tot}$ a soma dos quadrados totais em torno da média dos valores observados. Quando calculado sobre um conjunto de teste independente, o $R^2$ pode assumir valores negativos, indicando desempenho inferior ao obtido pela previsão baseada na média dos dados de treinamento.
+
+Foram calculados dois indicadores: o $R^2$ global, obtido a partir das previsões conjuntas de todos os sabores, e o $R^2$ por sabor. Essa distinção é necessária porque as diferenças de escala entre os volumes vendidos podem inflar artificialmente o desempenho global, refletindo principalmente a capacidade do modelo de distinguir sabores de alta e baixa demanda, sem necessariamente representar adequadamente a dinâmica temporal de cada sabor. Assim, o $R^2$ por sabor foi adotado como principal métrica de avaliação, enquanto o $R^2$ global foi utilizado apenas como medida complementar.
+
+O $R^2$ individual não foi calculado para sabores com menos de duas observações no conjunto de teste, uma vez que essa quantidade é insuficiente para estimar de forma confiável a variância explicada pelo modelo.

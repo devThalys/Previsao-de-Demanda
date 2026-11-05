@@ -1,0 +1,26 @@
+\section{Considerações Finais}
+\label{sec-consideracoes}
+
+Este trabalho desenvolveu e avaliou dois modelos de previsão de demanda  regressão linear e rede neural recorrente do tipo Long Short-Term Memory (LSTM)  aplicados ao planejamento da produção de uma empresa de sucos naturais. Os resultados demonstraram que, nas condições investigadas, a regressão linear apresentou desempenho superior ao da LSTM quando avaliada por sabor, evidenciando que modelos estatísticos mais simples podem ser mais adequados em cenários caracterizados por reduzido volume de dados históricos. Esse comportamento está de acordo com os resultados obtidos por Golabek et al.~\cite{golabek2020demand}, que também observaram desempenho competitivo de modelos lineares para previsão de demanda no setor de bebidas.
+
+Além da comparação entre os modelos, um dos principais resultados deste estudo foi a identificação da limitação do coeficiente de determinação ($R^2$) quando calculado de forma agregada para produtos com escalas de vendas heterogêneas. Embora ambos os modelos tenham apresentado elevados valores de $R^2$ global, a avaliação individual por sabor revelou desempenho significativamente inferior em diversos casos, demonstrando que métricas agregadas podem mascarar limitações relevantes do modelo. Esse resultado reforça a importância de complementar avaliações globais com métricas desagregadas por unidade de análise, contribuindo para interpretações mais consistentes do desempenho preditivo.
+
+A principal limitação do estudo está relacionada ao reduzido volume de dados disponível. Dos quinze sabores comercializados pela empresa, apenas nove possuíam histórico suficiente para o treinamento dos modelos, resultando em séries com apenas nove a doze observações mensais por sabor. Essa limitação afetou principalmente o desempenho da LSTM, cuja capacidade de modelar relações temporais complexas depende de conjuntos de dados substancialmente maiores. Da mesma forma, sabores recentemente introduzidos no portfólio permaneceram fora da etapa de modelagem por não apresentarem histórico suficiente para treinamento.
+
+No modelo de regressão linear, a análise dos coeficientes também evidenciou a presença de multicolinearidade entre as variáveis autorregressivas utilizadas, indicando oportunidades de aprimoramento por meio da seleção de variáveis ou da aplicação de técnicas de regularização. Além disso, a ocorrência de variações abruptas de demanda, como a observada para o sabor Abacaxi em junho de 2026, evidenciou que fatores operacionais e comerciais não contemplados pela base de dados podem exercer influência significativa sobre as vendas, reforçando a necessidade de complementar modelos quantitativos com informações do contexto operacional. 
+
+Como trabalhos futuros, destacam-se:
+
+\begin{itemize}
+    \item Ampliação da base histórica de vendas, permitindo a inclusão dos sabores atualmente excluídos e o aprimoramento dos modelos preditivos;
+    
+    \item Investigação de modelos hierárquicos ou de efeitos mistos, capazes de compartilhar informações entre sabores com diferentes volumes de dados;
+    
+    \item Aplicação de técnicas de regularização, como Ridge e Lasso, para reduzir os efeitos da multicolinearidade observada na regressão linear;
+    
+    \item Desenvolvimento de modelos baseados no consumo de insumos, em substituição à modelagem centrada no produto final, visando aprimorar o planejamento de compras e estoques;
+    
+    \item Incorporação de variáveis operacionais, como disponibilidade de matéria-prima, promoções e eventos específicos, para explicar oscilações de demanda não capturadas pelas variáveis atualmente utilizadas.
+\end{itemize}
+
+Em síntese, os resultados indicam que a escolha do modelo preditivo deve considerar não apenas sua complexidade, mas também a quantidade e as características dos dados disponíveis. Para o cenário analisado, a regressão linear apresentou maior consistência e capacidade de generalização, constituindo uma alternativa mais adequada para apoiar o planejamento da produção. A medida que a base de dados da empresa for ampliada, torna-se pertinente reavaliar essa comparação com arquiteturas mais sofisticadas de aprendizado profundo, ampliando o potencial de utilização da inteligência artificial no suporte as decisões produtivas. 
